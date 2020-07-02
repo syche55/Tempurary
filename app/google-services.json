@@ -1,0 +1,69 @@
+{
+  "project_info": {
+    "project_number": "1095370480626",
+    "firebase_url": "https://crease-90838.firebaseio.com",
+    "project_id": "crease-90838",
+    "storage_bucket": "crease-90838.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1095370480626:android:71a3ec865134462262296b",
+        "android_client_info": {
+          "package_name": "com.app.crease_CS5520"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1095370480626-cq0bf3pi6pdqku6fj8nptfhr2fndch7r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDmH1L_lmP38YiWujfFjMga8qrFSal5e9c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1095370480626-cq0bf3pi6pdqku6fj8nptfhr2fndch7r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1095370480626:android:601865af671f29b862296b",
+        "android_client_info": {
+          "package_name": "com.app.numad20su_siyuchen"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1095370480626-cq0bf3pi6pdqku6fj8nptfhr2fndch7r.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDmH1L_lmP38YiWujfFjMga8qrFSal5e9c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1095370480626-cq0bf3pi6pdqku6fj8nptfhr2fndch7r.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
