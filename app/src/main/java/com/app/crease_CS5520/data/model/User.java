@@ -1,4 +1,4 @@
-package com.app.crease_CS5520;
+package com.app.crease_CS5520.data.model;
 import com.google.firebase.database.IgnoreExtraProperties;
 import java.util.ArrayList;
 
