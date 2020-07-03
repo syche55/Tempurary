@@ -7,11 +7,48 @@
     tools:context=".MainActivity">
 
     <Button
-        android:id="@+id/button"
+        android:id="@+id/sendSticker"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Button"
+        android:onClick="sendSicker"
+        android:text="@string/send_the_sticker"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        tools:layout_editor_absoluteY="212dp" />
+        app:layout_constraintTop_toBottomOf="@id/enterSticker" />
+
+    <EditText
+        android:id="@+id/enterSticker"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:ems="10"
+        android:inputType="textPersonName"
+        android:text="@string/enter_a_sticker_id_1_3"
+        app:layout_constraintBottom_toTopOf="@id/sendSticker"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.497"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        android:autofillHints="" />
+
+    <Button
+        android:id="@+id/getHistory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:onClick="getHistory"
+        android:text="@string/get_the_history"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/sendSticker"
+        app:layout_constraintVertical_bias="0.024" />
+
+    <ListView
+        android:id="@+id/historyList"
+        android:layout_width="409dp"
+        android:layout_height="574dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/getHistory" />
 </androidx.constraintlayout.widget.ConstraintLayout>
