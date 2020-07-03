@@ -13,12 +13,7 @@
           "package_name": "com.app.crease_CS5520"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "1095370480626-cq0bf3pi6pdqku6fj8nptfhr2fndch7r.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
           "current_key": "AIzaSyDmH1L_lmP38YiWujfFjMga8qrFSal5e9c"
@@ -26,12 +21,7 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "1095370480626-cq0bf3pi6pdqku6fj8nptfhr2fndch7r.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     },
@@ -42,12 +32,7 @@
           "package_name": "com.app.numad20su_siyuchen"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "1095370480626-cq0bf3pi6pdqku6fj8nptfhr2fndch7r.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
           "current_key": "AIzaSyDmH1L_lmP38YiWujfFjMga8qrFSal5e9c"
@@ -55,12 +40,7 @@
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "1095370480626-cq0bf3pi6pdqku6fj8nptfhr2fndch7r.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }
