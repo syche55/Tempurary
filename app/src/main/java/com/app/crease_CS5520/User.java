@@ -1,5 +1,5 @@
 package com.app.crease_CS5520;
-
+import com.google.firebase.database.IgnoreExtraProperties;
 import java.util.ArrayList;
 
 public class User {
