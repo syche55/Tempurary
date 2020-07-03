@@ -14,7 +14,8 @@ public class User {
         this.username = username;
         this.stickers = new ArrayList<>();
         stickers.add(new String(Character.toChars(0x2764)));
-
+        stickers.add(new String(Character.toChars(0x2705)));
+        stickers.add(new String(Character.toChars(0x270B)));
     }
 
 }
