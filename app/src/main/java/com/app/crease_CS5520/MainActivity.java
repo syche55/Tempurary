@@ -84,15 +84,7 @@ public class MainActivity extends AppCompatActivity {
                 new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                       // User user = dataSnapshot.getValue(User.class);
 
-//                        if (dataSnapshot.getKey().equalsIgnoreCase("user1")) {
-//                            score.setText(user.score);
-//                            userName.setText(user.username);
-//                        } else {
-//                            score2.setText(String.valueOf(user.score));
-//                            userName2.setText(user.username);
-//                        }
 
 
                         Log.e(TAG, "onChildAdded: dataSnapshot = " + dataSnapshot.getValue());
@@ -102,9 +94,11 @@ public class MainActivity extends AppCompatActivity {
                     public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                         User user = dataSnapshot.getValue(User.class);
 
-//                        otherSticker.setText(user.history.get(user.history.size() - 1));
-//                        displayNum.setText(user.history.size());
+
                         Log.v(TAG, "onChildChanged: "+dataSnapshot.getValue().toString());
+                        // display username and sticker
+                        String display = user.username + ": " + user.history.get(user.history.size() - 1);
+                        otherSticker.setText(display);
                     }
 
                     @Override
@@ -141,11 +135,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public Transaction.Result doTransaction(MutableData mutableData) {
                         User u = mutableData.getValue(User.class);
-                        //if (u == null) {
 
-                            //Log.d(TAG,"USER LOG");
-                            //return Transaction.success(mutableData);
-                        //}
 
                         // add to history
                         if (stickerID == null) Log.d(TAG, "input string empty");
@@ -174,33 +164,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void doAddDataToDb(View view){
-        // Write a message to the database
-        FirebaseDatabase database = FirebaseDatabase.getInstance();
-        DatabaseReference myRef = database.getReference("message");
 
-        myRef.setValue("Hello, World!");
-
-        // Read from the database by listening for a change to that item.
-        myRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                String value = dataSnapshot.getValue(String.class);
-                Log.d(TAG, "Value is: " + value);
-//                TextView tv = (TextView)findViewById(R.id.dataUpdateTextView);
-//                tv.setText(value);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException());
-            }
-        });
-
-    }
 
 
 
