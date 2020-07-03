@@ -1,12 +1,12 @@
 package com.app.crease_CS5520;
 
+import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.RadioButton;
 import android.widget.TextView;
 
 import com.google.firebase.database.ChildEventListener;
@@ -18,43 +18,45 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
-import com.app.crease_CS5520.data.model.User;
-
-
-
-
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private DatabaseReference mDatabase;
-    private TextView userName;
-    private TextView score;
-    private TextView userName2;
-    private TextView score2;
-    private RadioButton player1;
-    private Button add5;
+    private TextView curUser;
+    private TextView otherUser;
+    private TextView curSticker;
+    private TextView otherSticker;
+    private Button sendSticker;
+    private Button getHistory;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        userName = (TextView) findViewById(R.id.username);
-        score = (TextView) findViewById(R.id.score);
-        userName2 = (TextView) findViewById(R.id.username2);
-        score2 = (TextView) findViewById(R.id.score2);
-
-        player1 = (RadioButton)findViewById(R.id.player1);
-
+        // init users' name
+        curUser = (TextView) findViewById(R.id.curUser);
+        otherUser = (TextView) findViewById(R.id.otherUser);
+        // init sticker view
+        curSticker = (TextView)findViewById(R.id.curSticker);
+        otherSticker = (TextView) findViewById(R.id.otherSticker);
+        // init database
         mDatabase = FirebaseDatabase.getInstance().getReference();
 
-        add5 = (Button)findViewById(R.id.add5);
-        add5.setOnClickListener(new View.OnClickListener() {
+        sendSticker = (Button)findViewById(R.id.sendSticker);
+        sendSticker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MainActivity.this.onAddScore(mDatabase, player1.isChecked() ? "user1" : "user2");
+                //MainActivity.this.onsendSticker(mDatabase, curUser.isChecked() ? "user1" : "user2");
+            }
+        });
+
+        getHistory = (Button)findViewById(R.id.getHistory);
+        getHistory.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                getHistory();
             }
         });
 
@@ -108,6 +110,10 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
+    public void getHistory(DatabaseReference postRef, String user) {
+        startActivity(new Intent(MainActivity.this, ShowHistory.class));
+    }
+
     /**
      * Called on score add
      * @param postRef
@@ -140,14 +146,6 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    public void resetUsers(View view){
-
-        User user = new User("user1", "0");
-        mDatabase.child("users").child(user.username).setValue(user);
-
-        User user2 = new User("user2", "0");
-        mDatabase.child("users").child(user2.username).setValue(user2);
-    }
 
     public void doAddDataToDb(View view){
         // Write a message to the database
@@ -176,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
         });
 
     }
+
 
 
 }
