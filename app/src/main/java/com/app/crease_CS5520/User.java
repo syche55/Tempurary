@@ -13,6 +13,7 @@ public class User {
     public User(String username){
         this.username = username;
         this.stickers = new ArrayList<>();
+        stickers.add(0);
 
     }
 
