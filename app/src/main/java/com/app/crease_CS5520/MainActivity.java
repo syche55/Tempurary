@@ -134,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
                     public Transaction.Result doTransaction(MutableData mutableData) {
                         User u = mutableData.getValue(User.class);
                         if (u == null) {
+                            Log.d(TAG, "No user");
                             return Transaction.success(mutableData);
                         }
 
