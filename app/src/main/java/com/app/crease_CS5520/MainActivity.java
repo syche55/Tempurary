@@ -19,8 +19,7 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
-import edu.neu.madcourse.firebasedemo.R;
-import edu.neu.madcourse.firebasedemo.realtimedatabase.models.User;
+import com.app.crease_CS5520.User;
 
 
 
