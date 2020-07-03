@@ -53,13 +53,21 @@ public class MainActivity extends AppCompatActivity {
 
         // get the username
         Intent mIntent = getIntent();
-        username = mIntent.getStringExtra("username"); // -1 is the default value
+        username = mIntent.getExtras().getString("username");
+
+        Log.d(TAG, "Check if user name entered correctly"+username);
+
+
+        // new user created in database
+        User user = new User(username);
+        mDatabase.child("users").child(username).setValue(user);
+
 
         sendSticker = (Button)findViewById(R.id.sendSticker);
         sendSticker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                MainActivity.this.onSendSticker(mDatabase, username, enterSticker.getText().toString());
+                MainActivity.this.onSendSticker(mDatabase, enterSticker.getText().toString());
             }
         });
 
@@ -72,12 +80,11 @@ public class MainActivity extends AppCompatActivity {
 //        });
 
 
-
         mDatabase.child("users").addChildEventListener(
                 new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                        User user = dataSnapshot.getValue(User.class);
+                       // User user = dataSnapshot.getValue(User.class);
 
 //                        if (dataSnapshot.getKey().equalsIgnoreCase("user1")) {
 //                            score.setText(user.score);
@@ -86,6 +93,8 @@ public class MainActivity extends AppCompatActivity {
 //                            score2.setText(String.valueOf(user.score));
 //                            userName2.setText(user.username);
 //                        }
+
+
                         Log.e(TAG, "onChildAdded: dataSnapshot = " + dataSnapshot.getValue());
                     }
 
@@ -123,35 +132,33 @@ public class MainActivity extends AppCompatActivity {
     /**
      * Called on score add
      * @param postRef
-     * @param user
      */
-    private void onSendSticker(DatabaseReference postRef, String user, final String stickerID) {
+    private void onSendSticker(DatabaseReference postRef, final String stickerID) {
         postRef
                 .child("users")
-                .child(user)
+                .child(username)
                 .runTransaction(new Transaction.Handler() {
                     @Override
                     public Transaction.Result doTransaction(MutableData mutableData) {
                         User u = mutableData.getValue(User.class);
-                        if (u == null) {
-                            Log.d(TAG, "No user");
-                            return Transaction.success(mutableData);
-                        }
+                        //if (u == null) {
 
-                        // add to history, display sticker
+                            //Log.d(TAG,"USER LOG");
+                            //return Transaction.success(mutableData);
+                        //}
 
                         // add to history
                         if (stickerID == null) Log.d(TAG, "input string empty");
-                        else if (stickerID.equals("1")) u.history.add("0x2764");
-                        else if (stickerID.equals("2")) u.history.add("0x270B");
-                        else u.history.add("0x2705");
+                        else if (stickerID.equals("1")) u.history.add(u.stickers.get(0));
+                        else if (stickerID.equals("2")) u.history.add(u.stickers.get(1));
+                        else u.history.add(u.stickers.get(2));
 
                         // display sticker
                         String display = username + ": " + u.history.get(u.history.size() - 1);
                         otherSticker.setText(display);
 
                         // display number
-                        displayNum.setText(u.history.size());
+                        displayNum.setText(String.valueOf(u.history.size()));
 
                         mutableData.setValue(u);
                         return Transaction.success(mutableData);

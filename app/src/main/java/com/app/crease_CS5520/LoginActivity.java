@@ -16,14 +16,13 @@ public class LoginActivity extends AppCompatActivity {
     private Button login;
     private String username;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        typeUsername = (EditText) findViewById(R.id.typeUsername);
-        login = (Button) findViewById(R.id.login);
-        username = typeUsername.getText().toString();
+
     }
 
     // activity when clicking "about" button
@@ -32,6 +31,12 @@ public class LoginActivity extends AppCompatActivity {
         // to the Android system defining the components you are targeting.
 
         // go to the main page (pass in the username)
+
+        typeUsername = (EditText) findViewById(R.id.typeUsername);
+        login = (Button) findViewById(R.id.login);
+        username = typeUsername.getText().toString();
+
+        
         Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
         myIntent.putExtra("username", username);
         startActivity(myIntent);
