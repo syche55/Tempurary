@@ -4,8 +4,8 @@ import java.util.ArrayList;
 
 public class User {
     public String username;
-    public ArrayList<Integer> stickers;
-    public ArrayList<Integer> history;
+    public ArrayList<String> stickers;
+    public ArrayList<String> history;
 
     public User(){
     }
@@ -13,6 +13,7 @@ public class User {
     public User(String username){
         this.username = username;
         this.stickers = new ArrayList<>();
+        stickers.add(new String(Character.toChars(0x2764)));
 
     }
 
