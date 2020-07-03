@@ -7,8 +7,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 
+import com.app.crease_CS5520.data.model.User;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -30,6 +32,9 @@ public class MainActivity extends AppCompatActivity {
     private TextView otherSticker;
     private Button sendSticker;
     private Button getHistory;
+    private TextView displayNum;
+    private EditText enterSticker;
+    private String username;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,26 +44,32 @@ public class MainActivity extends AppCompatActivity {
         curUser = (TextView) findViewById(R.id.curUser);
         otherUser = (TextView) findViewById(R.id.otherUser);
         // init sticker view
-        curSticker = (TextView)findViewById(R.id.curSticker);
         otherSticker = (TextView) findViewById(R.id.otherSticker);
+        enterSticker = (EditText) findViewById(R.id.enterSticker);
         // init database
         mDatabase = FirebaseDatabase.getInstance().getReference();
+        // init stickers number display
+        displayNum = (TextView) findViewById(R.id.displayNum);
+
+        // get the username
+        Intent mIntent = getIntent();
+        username = mIntent.getStringExtra("username"); // -1 is the default value
 
         sendSticker = (Button)findViewById(R.id.sendSticker);
         sendSticker.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //MainActivity.this.onsendSticker(mDatabase, curUser.isChecked() ? "user1" : "user2");
+                MainActivity.this.onSendSticker(mDatabase, username, enterSticker.getText().toString());
             }
         });
 
         getHistory = (Button)findViewById(R.id.getHistory);
-        getHistory.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view) {
-                getHistory();
-            }
-        });
+//        getHistory.setOnClickListener(new View.OnClickListener(){
+//            @Override
+//            public void onClick(View view) {
+//                getHistory();
+//            }
+//        });
 
 
 
@@ -68,13 +79,13 @@ public class MainActivity extends AppCompatActivity {
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                         User user = dataSnapshot.getValue(User.class);
 
-                        if (dataSnapshot.getKey().equalsIgnoreCase("user1")) {
-                            score.setText(user.score);
-                            userName.setText(user.username);
-                        } else {
-                            score2.setText(String.valueOf(user.score));
-                            userName2.setText(user.username);
-                        }
+//                        if (dataSnapshot.getKey().equalsIgnoreCase("user1")) {
+//                            score.setText(user.score);
+//                            userName.setText(user.username);
+//                        } else {
+//                            score2.setText(String.valueOf(user.score));
+//                            userName2.setText(user.username);
+//                        }
                         Log.e(TAG, "onChildAdded: dataSnapshot = " + dataSnapshot.getValue());
                     }
 
@@ -82,13 +93,8 @@ public class MainActivity extends AppCompatActivity {
                     public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                         User user = dataSnapshot.getValue(User.class);
 
-                        if (dataSnapshot.getKey().equalsIgnoreCase("user1")) {
-                            score.setText(user.score);
-                            userName.setText(user.username);
-                        } else {
-                            score2.setText(String.valueOf(user.score));
-                            userName2.setText(user.username);
-                        }
+//                        otherSticker.setText(user.history.get(user.history.size() - 1));
+//                        displayNum.setText(user.history.size());
                         Log.v(TAG, "onChildChanged: "+dataSnapshot.getValue().toString());
                     }
 
@@ -110,16 +116,16 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
-    public void getHistory(DatabaseReference postRef, String user) {
-        startActivity(new Intent(MainActivity.this, ShowHistory.class));
-    }
+//    public void getHistory(DatabaseReference postRef, String user) {
+//        startActivity(new Intent(MainActivity.this, ShowHistory.class));
+//    }
 
     /**
      * Called on score add
      * @param postRef
      * @param user
      */
-    private void onAddScore(DatabaseReference postRef, String user) {
+    private void onSendSticker(DatabaseReference postRef, String user, final String stickerID) {
         postRef
                 .child("users")
                 .child(user)
@@ -131,7 +137,20 @@ public class MainActivity extends AppCompatActivity {
                             return Transaction.success(mutableData);
                         }
 
-                        u.score = String.valueOf(Integer.valueOf(u.score) + 5);
+                        // add to history, display sticker
+
+                        // add to history
+                        if (stickerID == null) Log.d(TAG, "input string empty");
+                        else if (stickerID.equals("1")) u.history.add("0x2764");
+                        else if (stickerID.equals("2")) u.history.add("0x270B");
+                        else u.history.add("0x2705");
+
+                        // display sticker
+                        String display = username + ": " + u.history.get(u.history.size() - 1);
+                        otherSticker.setText(display);
+
+                        // display number
+                        displayNum.setText(u.history.size());
 
                         mutableData.setValue(u);
                         return Transaction.success(mutableData);
@@ -162,8 +181,8 @@ public class MainActivity extends AppCompatActivity {
                 // whenever data at this location is updated.
                 String value = dataSnapshot.getValue(String.class);
                 Log.d(TAG, "Value is: " + value);
-                TextView tv = (TextView)findViewById(R.id.dataUpdateTextView);
-                tv.setText(value);
+//                TextView tv = (TextView)findViewById(R.id.dataUpdateTextView);
+//                tv.setText(value);
             }
 
             @Override
