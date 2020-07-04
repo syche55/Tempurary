@@ -22,21 +22,15 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-
     }
 
-    // activity when clicking "about" button
+    // activity when clicking "login" button
     public void clickLogin(View view) {
-        // Intents are objects of the android.content.Intent type. Your code can send them
-        // to the Android system defining the components you are targeting.
-
-        // go to the main page (pass in the username)
-
         typeUsername = (EditText) findViewById(R.id.typeUsername);
         login = (Button) findViewById(R.id.login);
         username = typeUsername.getText().toString();
 
-        
+        // parse login username to MainActivity
         Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
         myIntent.putExtra("username", username);
         startActivity(myIntent);

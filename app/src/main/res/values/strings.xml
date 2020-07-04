@@ -11,7 +11,6 @@
     <string name="send">send</string>
     <string name="get_history">Get History</string>
     <string name="you_ve_sent_0">You\'ve sent: 0</string>
-    <string name="me">Me</string>
-    <string name="other">Other</string>
+    <string name="other">New Message: </string>
     <string name="_1">1</string>
 </resources>

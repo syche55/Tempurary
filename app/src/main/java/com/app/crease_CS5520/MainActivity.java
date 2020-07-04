@@ -20,29 +20,27 @@ import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
+
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
     private DatabaseReference mDatabase;
-    private TextView curUser;
-    private TextView otherUser;
-    private TextView curSticker;
     private TextView otherSticker;
     private Button sendSticker;
     private Button getHistory;
     private TextView displayNum;
     private EditText enterSticker;
     private String username;
+    private User signOnUser;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        // init users' name
-        curUser = (TextView) findViewById(R.id.curUser);
-        otherUser = (TextView) findViewById(R.id.otherUser);
         // init sticker view
         otherSticker = (TextView) findViewById(R.id.otherSticker);
         enterSticker = (EditText) findViewById(R.id.enterSticker);
@@ -51,18 +49,17 @@ public class MainActivity extends AppCompatActivity {
         // init stickers number display
         displayNum = (TextView) findViewById(R.id.displayNum);
 
-        // get the username
+        // get the username from login page
         Intent mIntent = getIntent();
         username = mIntent.getExtras().getString("username");
 
-        Log.d(TAG, "Check if user name entered correctly"+username);
-
 
         // new user created in database
-        User user = new User(username);
-        mDatabase.child("users").child(username).setValue(user);
+        signOnUser = new User(username);
+        mDatabase.child("users").child(username).setValue(signOnUser);
 
 
+        // send sticker button
         sendSticker = (Button)findViewById(R.id.sendSticker);
         sendSticker.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -71,31 +68,30 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // get history button
         getHistory = (Button)findViewById(R.id.getHistory);
-//        getHistory.setOnClickListener(new View.OnClickListener(){
-//            @Override
-//            public void onClick(View view) {
-//                getHistory();
-//            }
-//        });
-
+        getHistory.setOnClickListener(new View.OnClickListener(){
+            @Override
+            public void onClick(View view) {
+                getHistory(username);
+            }
+        });
 
         mDatabase.child("users").addChildEventListener(
                 new ChildEventListener() {
                     @Override
                     public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-
-
-
+                        // test if node added correctly
                         Log.e(TAG, "onChildAdded: dataSnapshot = " + dataSnapshot.getValue());
                     }
 
                     @Override
                     public void onChildChanged(DataSnapshot dataSnapshot, String s) {
                         User user = dataSnapshot.getValue(User.class);
-
-
-                        Log.v(TAG, "onChildChanged: "+dataSnapshot.getValue().toString());
+                        // check if the change made is the login user
+                        if (user.username.equalsIgnoreCase(username)){
+                            signOnUser = user;
+                        }
                         // display username and sticker
                         String display = user.username + ": " + user.history.get(user.history.size() - 1);
                         otherSticker.setText(display);
@@ -119,9 +115,19 @@ public class MainActivity extends AppCompatActivity {
         );
     }
 
-//    public void getHistory(DatabaseReference postRef, String user) {
-//        startActivity(new Intent(MainActivity.this, ShowHistory.class));
-//    }
+
+
+
+    public void getHistory(String username) {
+        // parse current sign on user stickers history to showHistory page
+        Intent showHistoryIntent = new Intent(MainActivity.this, ShowHistory.class);
+        showHistoryIntent.putExtra("showHistoryParse", signOnUser.history);
+        showHistoryIntent.putExtra("username", username);
+
+        startActivity(showHistoryIntent);
+    }
+
+
 
     /**
      * Called on score add
@@ -136,7 +142,6 @@ public class MainActivity extends AppCompatActivity {
                     public Transaction.Result doTransaction(MutableData mutableData) {
                         User u = mutableData.getValue(User.class);
 
-
                         // add to history
                         if (stickerID == null) Log.d(TAG, "input string empty");
                         else if (stickerID.equals("1")) u.history.add(u.stickers.get(0));
@@ -147,7 +152,7 @@ public class MainActivity extends AppCompatActivity {
                         String display = username + ": " + u.history.get(u.history.size() - 1);
                         otherSticker.setText(display);
 
-                        // display number
+                        // display number of stickers sent
                         displayNum.setText(String.valueOf(u.history.size()));
 
                         mutableData.setValue(u);
@@ -157,7 +162,7 @@ public class MainActivity extends AppCompatActivity {
                     @Override
                     public void onComplete(DatabaseError databaseError, boolean b,
                                            DataSnapshot dataSnapshot) {
-                        // Transaction completed
+                        // transaction completed
                         Log.d(TAG, "postTransaction:onComplete:" + databaseError);
                     }
                 });
