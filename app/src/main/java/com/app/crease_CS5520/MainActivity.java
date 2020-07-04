@@ -3,14 +3,21 @@ package com.app.crease_CS5520;
 import android.content.Intent;
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.app.crease_CS5520.data.model.User;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -19,14 +26,25 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.messaging.FirebaseMessaging;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.ArrayList;
+import java.util.Scanner;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    private static final String SERVER_KEY = "AAAA2hXlUTA:APA91bFhRbEipDF4z0LT4DJUC05x5hfL2yFXohyw4KyTQ0OVV349roAvnSPjiwGtrSUI-VO8b3IF55V6itrf-Y5FCtkAXHYq7dw066uqNA7C16UANOysccvY0SJfwrtW0x6LmAcx8UD8";
     private DatabaseReference mDatabase;
     private TextView otherSticker;
     private Button sendSticker;
@@ -57,6 +75,19 @@ public class MainActivity extends AppCompatActivity {
         // new user created in database
         signOnUser = new User(username);
         mDatabase.child("users").child(username).setValue(signOnUser);
+        // automatically subscribe to news topic
+        FirebaseMessaging.getInstance().subscribeToTopic("news")
+                .addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        String msg = getString(R.string.msg_subscribed);
+                        if (!task.isSuccessful()) {
+                            msg = getString(R.string.msg_subscribe_failed);
+                        }
+                        Log.d(TAG, msg);
+                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
+                    }
+                });
 
 
         // send sticker button
@@ -65,6 +96,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 MainActivity.this.onSendSticker(mDatabase, enterSticker.getText().toString());
+                sendMessageToNews(view);
             }
         });
 
@@ -113,6 +145,63 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
+    }
+
+
+
+    public void sendMessageToNews(View type) {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                sendMessageToNews();
+            }
+        }).start();
+    }
+
+    private void sendMessageToNews(){
+        JSONObject jPayload = new JSONObject();
+        JSONObject jNotification = new JSONObject();
+        try {
+            jNotification.put("message", "This is a Firebase Cloud Messaging topic \"news\" message!");
+            jNotification.put("body", "News Body");
+            jNotification.put("sound", "default");
+            jNotification.put("badge", "1");
+            jNotification.put("click_action", "OPEN_ACTIVITY_1");
+
+            // Populate the Payload object.
+            // Note that "to" is a topic, not a token representing an app instance
+            jPayload.put("to", "/topics/news");
+            jPayload.put("priority", "high");
+            jPayload.put("notification", jNotification);
+
+            // Open the HTTP connection and send the payload
+            URL url = new URL("https://fcm.googleapis.com/fcm/send");
+            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+            conn.setRequestMethod("POST");
+            conn.setRequestProperty("Authorization", SERVER_KEY);
+            conn.setRequestProperty("Content-Type", "application/json");
+            conn.setDoOutput(true);
+
+            // Send FCM message content.
+            OutputStream outputStream = conn.getOutputStream();
+            outputStream.write(jPayload.toString().getBytes());
+            outputStream.close();
+
+            // Read FCM response.
+            InputStream inputStream = conn.getInputStream();
+            final String resp = convertStreamToString(inputStream);
+
+            Handler h = new Handler(Looper.getMainLooper());
+            h.post(new Runnable() {
+                @Override
+                public void run() {
+                    Log.e(TAG, "run: " + resp);
+                    Toast.makeText(MainActivity.this,"response was: " + resp,Toast.LENGTH_LONG).show();
+                }
+            });
+        } catch (JSONException | IOException e) {
+            Log.e(TAG,"sendMessageToNews threw error",e);
+        }
     }
 
 
@@ -168,9 +257,9 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-
-
-
-
+    private String convertStreamToString(InputStream is) {
+        Scanner s = new Scanner(is).useDelimiter("\\A");
+        return s.hasNext() ? s.next().replace(",", ",\n") : "";
+    }
 
 }
