@@ -39,6 +39,13 @@ public class LoginActivity extends AppCompatActivity {
     private String username;
     // don't have to request the Push Notification permissions.
 
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_login);
+
+    }
     // activity when clicking "login" button
     public void clickLogin(View view) {
         typeUsername = (EditText) findViewById(R.id.typeUsername);
