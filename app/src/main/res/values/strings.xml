@@ -13,4 +13,6 @@
     <string name="you_ve_sent_0">You\'ve sent: 0</string>
     <string name="other">New Message: </string>
     <string name="_1">1</string>
+    <string name="msg_subscribed">Subscribed</string>
+    <string name="msg_subscribe_failed">Subscribe Failed</string>
 </resources>
