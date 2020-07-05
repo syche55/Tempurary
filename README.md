@@ -31,8 +31,6 @@ Holding Zoom meeting for pair work:
 10. Jing Shen worked on Main Layout.
 
 <a href="https://ibb.co/JHBv6v6"><img src="https://i.ibb.co/w40SGSG/link.png" alt="link" border="0"></a>
-<hr>
- <a href="https://ibb.co/QD2m99S"><img src="https://i.ibb.co/y4ws00v/Wechat-IMG2664.png" alt="IMG2664" border="0"></a>
 
 ## Work on Main activity Logic
 [driver: Siyu Chen, Navigator: ZongWei Fan, Jing Shen]
@@ -49,10 +47,19 @@ Can receive other user's message(name and sticker).
 
 Get current user's stickers he/she sent.
 
-<a href="https://ibb.co/ZMwMPWW"><img src="https://i.ibb.co/d535qGG/zoom.png" alt="zoom" border="0"></a>
-
 - [x] Update layout - different device size screen, orientation
 
---Waiting Update
+## Work on Sending Notification
+- Waiting
 
 
+## Work on Main activity Logic & layout
+Need to update new main layout since requirement on piazza:
+
+Show a selection of sticker pictures, and the user taps on one of the stickers. 
+
+[driver: Siyu Chen, Navigator: Jing Shen]
+- [x] Created and updated stickers class
+- [x] Show stickers collections
+- [x] allow user tap stickers and send 
+- [x] Adapt to FireBase login username
