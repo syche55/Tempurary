@@ -10,8 +10,10 @@ import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,6 +56,7 @@ public class MainActivity extends AppCompatActivity {
     private EditText enterSticker;
     private String username;
     private User signOnUser;
+    private ListView stickerView;
 
 
     @Override
@@ -146,7 +149,20 @@ public class MainActivity extends AppCompatActivity {
                     }
                 }
         );
+
+        stickerView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                // Get the selected item text from ListView
+                String selectedItem = (String) parent.getItemAtPosition(position);
+                // get tap stickers - go to db find sticker'id
+
+                // send and display
+                MainActivity.this.onSendSticker(mDatabase, selectedItem);
+            }
+        });
     }
+
 
 
 
@@ -206,8 +222,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
-
     public void getHistory(String username) {
         // parse current sign on user stickers history to showHistory page
         Intent showHistoryIntent = new Intent(MainActivity.this, ShowHistory.class);
@@ -218,11 +232,13 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     /**
      * Called on score add
      * @param postRef
      */
+    // --> tap stickers and send
+
+
     private void onSendSticker(DatabaseReference postRef, final String stickerID) {
         postRef
                 .child("users")

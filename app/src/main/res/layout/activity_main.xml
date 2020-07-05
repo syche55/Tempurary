@@ -81,4 +81,12 @@
         app:layout_constraintStart_toStartOf="@+id/enterSticker"
         app:layout_constraintTop_toBottomOf="@+id/otherSticker" />
 
+    <ListView
+        android:id="@+id/stickerView"
+        android:layout_width="415dp"
+        android:layout_height="301dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>
