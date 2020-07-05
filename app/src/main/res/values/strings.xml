@@ -10,9 +10,11 @@
     <string name="type_username">type username</string>
     <string name="send">send</string>
     <string name="get_history">Get History</string>
-    <string name="you_ve_sent_0">You\'ve sent: 0</string>
+    <string name="you_ve_sent_0">Total number of stickers sent: 0</string>
     <string name="other">New Message: </string>
     <string name="_1">1</string>
     <string name="msg_subscribed">Subscribed</string>
     <string name="msg_subscribe_failed">Subscribe Failed</string>
+    <string name="chat_history">Chat History</string>
+    <string name="tap_a_emoji_below_to_send_a_new_message">Tap a emoji below to send a new message</string>
 </resources>

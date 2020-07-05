@@ -1,22 +1,29 @@
 package com.app.crease_CS5520;
 
+import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.app.crease_CS5520.data.model.Stickers;
 import com.app.crease_CS5520.data.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
@@ -37,9 +44,12 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 
@@ -53,10 +63,15 @@ public class MainActivity extends AppCompatActivity {
     private Button sendSticker;
     private Button getHistory;
     private TextView displayNum;
-    private EditText enterSticker;
     private String username;
     private User signOnUser;
     private ListView stickerView;
+    private ArrayAdapter<String> adapter;
+    private ArrayList<String> stickerContainer;
+    private ArrayList<String> chatHistory;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView recyclerView;
+
 
 
     @Override
@@ -65,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         // init sticker view
         otherSticker = (TextView) findViewById(R.id.otherSticker);
-        enterSticker = (EditText) findViewById(R.id.enterSticker);
         // init database
         mDatabase = FirebaseDatabase.getInstance().getReference();
         // init stickers number display
@@ -79,6 +93,30 @@ public class MainActivity extends AppCompatActivity {
         // new user created in database
         signOnUser = new User(username);
         mDatabase.child("users").child(username).setValue(signOnUser);
+
+        // create user sticker view
+        stickerView = findViewById(R.id.stickerView);
+        stickerContainer=new ArrayList<>(signOnUser.userSticker.defaultStickerGroup.values());
+        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, stickerContainer);
+
+
+        chatHistory = new ArrayList<>();
+
+
+        recyclerView = (RecyclerView) findViewById(R.id.chatRecyclerView);
+//        recyclerView.setHasFixedSize(true);
+        LinearLayoutManager layoutManager = new LinearLayoutManager(this);
+//        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
+        recyclerView.setLayoutManager(layoutManager);
+
+        mAdapter = new MyAdapter(MainActivity.this, chatHistory);
+        recyclerView.setAdapter(mAdapter);
+
+
+
+        stickerView.setAdapter(adapter);
+        //adapter.notifyDataSetChanged();
+
         // automatically subscribe to news topic
         FirebaseMessaging.getInstance().subscribeToTopic("news")
                 .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -93,16 +131,6 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
-
-        // send sticker button
-        sendSticker = (Button)findViewById(R.id.sendSticker);
-        sendSticker.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                MainActivity.this.onSendSticker(mDatabase, enterSticker.getText().toString());
-                sendMessageToNews(view);
-            }
-        });
 
         // get history button
         getHistory = (Button)findViewById(R.id.getHistory);
@@ -131,6 +159,11 @@ public class MainActivity extends AppCompatActivity {
                         // display username and sticker
                         String display = user.username + ": " + user.history.get(user.history.size() - 1);
                         otherSticker.setText(display);
+                        chatHistory.add(display);
+                        mAdapter.notifyDataSetChanged();
+                        recyclerView.scrollToPosition(mAdapter.getItemCount()-1);
+
+
                     }
 
                     @Override
@@ -155,13 +188,57 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Get the selected item text from ListView
                 String selectedItem = (String) parent.getItemAtPosition(position);
-                // get tap stickers - go to db find sticker'id
+                Log.d(TAG, selectedItem);
+                String key = "";
+                for (Map.Entry<String, String> entry : signOnUser.userSticker.defaultStickerGroup.entrySet()) {
+                    if (entry.getValue().equals(selectedItem)) {
+                        key=entry.getKey();
+                    }
+                }
 
                 // send and display
-                MainActivity.this.onSendSticker(mDatabase, selectedItem);
+                MainActivity.this.onSendSticker(mDatabase, key);
             }
         });
     }
+
+    class MyAdapter extends RecyclerView.Adapter<MainActivity.ViewHolder> {
+
+        private Context context;
+        private List<String> list;
+
+        public MyAdapter(Context context, List<String> list) {
+            this.context = context;
+            this.list = list;
+        }
+
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.item_recycler, parent, false));
+        }
+
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+            Log.d(TAG, "onBindViewHolder: " + list.size());
+            Log.d(TAG, "Item is " + list.get(position));
+            holder.vText.setText(list.get(position));
+        }
+
+
+        @Override
+        public int getItemCount() {
+            return list == null ? 0 : list.size();
+        }
+    }
+
+    class ViewHolder extends RecyclerView.ViewHolder {
+        TextView vText;
+        public ViewHolder(View itemView) {
+            super(itemView);
+            vText = (TextView) itemView.findViewById(R.id.historyItem);
+        }
+    }
+
 
 
 
@@ -237,8 +314,6 @@ public class MainActivity extends AppCompatActivity {
      * @param postRef
      */
     // --> tap stickers and send
-
-
     private void onSendSticker(DatabaseReference postRef, final String stickerID) {
         postRef
                 .child("users")
@@ -250,16 +325,14 @@ public class MainActivity extends AppCompatActivity {
 
                         // add to history
                         if (stickerID == null) Log.d(TAG, "input string empty");
-                        else if (stickerID.equals("1")) u.history.add(u.stickers.get(0));
-                        else if (stickerID.equals("2")) u.history.add(u.stickers.get(1));
-                        else u.history.add(u.stickers.get(2));
+                        u.history.add(u.userSticker.defaultStickerGroup.get(stickerID));
 
                         // display sticker
                         String display = username + ": " + u.history.get(u.history.size() - 1);
                         otherSticker.setText(display);
 
                         // display number of stickers sent
-                        displayNum.setText(String.valueOf(u.history.size()));
+                        displayNum.setText("Total number of stickers sent: "+String.valueOf(u.history.size()));
 
                         mutableData.setValue(u);
                         return Transaction.success(mutableData);
@@ -278,6 +351,7 @@ public class MainActivity extends AppCompatActivity {
         Scanner s = new Scanner(is).useDelimiter("\\A");
         return s.hasNext() ? s.next().replace(",", ",\n") : "";
     }
+
 
 
 }

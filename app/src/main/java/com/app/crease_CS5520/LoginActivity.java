@@ -17,6 +17,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -37,6 +38,7 @@ public class LoginActivity extends AppCompatActivity {
     private EditText typeUsername;
     private Button login;
     private String username;
+    private TextView errorMessage;
     // don't have to request the Push Notification permissions.
 
 
@@ -51,11 +53,15 @@ public class LoginActivity extends AppCompatActivity {
         typeUsername = (EditText) findViewById(R.id.typeUsername);
         login = (Button) findViewById(R.id.login);
         username = typeUsername.getText().toString();
-
-        // parse login username to MainActivity
-        Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
-        myIntent.putExtra("username", username);
-        startActivity(myIntent);
+        if (username.contains(".") || username.contains("#") || username.contains("$") || username.contains("[") || username.contains("]")){
+            errorMessage = (TextView) findViewById(R.id.usernameErrorMessage);
+            errorMessage.setText("Your username cannot contain '.', '#', '$', '[', or ']'");
+        } else {
+            // parse login username to MainActivity
+            Intent myIntent = new Intent(LoginActivity.this, MainActivity.class);
+            myIntent.putExtra("username", username);
+            startActivity(myIntent);
+        }
     }
 
 
