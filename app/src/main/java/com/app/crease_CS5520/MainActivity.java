@@ -170,6 +170,14 @@ public class MainActivity extends AppCompatActivity {
                         // display username and sticker
                         String display = user.username + ": " + user.history.get(user.history.size() - 1);
                         otherSticker.setText(display);
+
+                        // when user receives new messages from other users, vibrate
+                        if (!user.username.equalsIgnoreCase(username)&&vibrator !=null && vibrator.hasVibrator()){
+                            VibrationEffect effect = VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE);
+                            vibrator.vibrate(effect);
+                        } else {
+                            Log.e(TAG, "No vibrator");
+                        }
                         chatHistory.add(display);
                         mAdapter.notifyDataSetChanged();
                         recyclerView.scrollToPosition(mAdapter.getItemCount()-1);
@@ -342,12 +350,7 @@ public class MainActivity extends AppCompatActivity {
                         String display = username + ": " + u.history.get(u.history.size() - 1);
                         otherSticker.setText(display);
 
-                        if (vibrator !=null && vibrator.hasVibrator()){
-                            VibrationEffect effect = VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE);
-                            vibrator.vibrate(effect);
-                        } else {
-                            Log.e(TAG, "No vibrator");
-                        }
+
                         // display number of stickers sent
                         displayNum.setText("Total number of stickers sent: "+String.valueOf(u.history.size()));
 
