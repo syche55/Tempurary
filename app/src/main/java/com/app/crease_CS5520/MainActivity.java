@@ -1,7 +1,10 @@
 package com.app.crease_CS5520;
 
+import android.app.Activity;
+import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.media.AudioAttributes;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -11,6 +14,8 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.os.Handler;
 import android.os.Looper;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -71,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
     private ArrayList<String> chatHistory;
     private RecyclerView.Adapter mAdapter;
     private RecyclerView recyclerView;
+    private Vibrator vibrator;
 
 
 
@@ -141,6 +147,11 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        // vibration
+        vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+
+
+
         mDatabase.child("users").addChildEventListener(
                 new ChildEventListener() {
                     @Override
@@ -159,6 +170,14 @@ public class MainActivity extends AppCompatActivity {
                         // display username and sticker
                         String display = user.username + ": " + user.history.get(user.history.size() - 1);
                         otherSticker.setText(display);
+
+                        // when user receives new messages from other users, vibrate
+                        if (!user.username.equalsIgnoreCase(username)&&vibrator !=null && vibrator.hasVibrator()){
+                            VibrationEffect effect = VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE);
+                            vibrator.vibrate(effect);
+                        } else {
+                            Log.e(TAG, "No vibrator");
+                        }
                         chatHistory.add(display);
                         mAdapter.notifyDataSetChanged();
                         recyclerView.scrollToPosition(mAdapter.getItemCount()-1);
@@ -330,6 +349,7 @@ public class MainActivity extends AppCompatActivity {
                         // display sticker
                         String display = username + ": " + u.history.get(u.history.size() - 1);
                         otherSticker.setText(display);
+
 
                         // display number of stickers sent
                         displayNum.setText("Total number of stickers sent: "+String.valueOf(u.history.size()));
