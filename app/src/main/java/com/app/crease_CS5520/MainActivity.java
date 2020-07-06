@@ -32,6 +32,8 @@ import com.app.crease_CS5520.data.model.Stickers;
 import com.app.crease_CS5520.data.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -62,6 +64,8 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
+    private FirebaseAuth mAuth;
+
     private static final String SERVER_KEY = "AAAA2hXlUTA:APA91bFhRbEipDF4z0LT4DJUC05x5hfL2yFXohyw4KyTQ0OVV349roAvnSPjiwGtrSUI-VO8b3IF55V6itrf-Y5FCtkAXHYq7dw066uqNA7C16UANOysccvY0SJfwrtW0x6LmAcx8UD8";
     private DatabaseReference mDatabase;
     private TextView otherSticker;
@@ -84,6 +88,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
         // init sticker view
         otherSticker = (TextView) findViewById(R.id.otherSticker);
         // init database
@@ -95,10 +100,39 @@ public class MainActivity extends AppCompatActivity {
         Intent mIntent = getIntent();
         username = mIntent.getExtras().getString("username");
 
+        // first check if user already in database
 
-        // new user created in database
-        signOnUser = new User(username);
-        mDatabase.child("users").child(username).setValue(signOnUser);
+        mDatabase.child("users").orderByKey().equalTo(username).addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                User user = dataSnapshot.getValue(User.class);
+                signOnUser = user;
+                mDatabase.child("users").child(username).setValue(signOnUser);
+                displayNum.setText("Total number of stickers sent: "+String.valueOf(user.history.size()));
+            }
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+            }
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "onCancelled:" + databaseError);
+            }
+        });
+
+        // if not, then create new user
+        if (signOnUser == null) {
+            signOnUser = new User(username);
+            mDatabase.child("users").child(username).setValue(signOnUser);
+        }
+
+        Log.e(TAG, "history size is " + signOnUser.history.size());
+
 
         // create user sticker view
         stickerView = findViewById(R.id.stickerView);
@@ -168,7 +202,8 @@ public class MainActivity extends AppCompatActivity {
                             signOnUser = user;
                         }
                         // display username and sticker
-                        String display = user.username + ": " + user.history.get(user.history.size() - 1);
+
+                        String display = user.history.size() > 0 ? user.username + ": " + user.history.get(user.history.size() - 1) : "";
                         otherSticker.setText(display);
 
                         // when user receives new messages from other users, vibrate
@@ -220,6 +255,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 
     class MyAdapter extends RecyclerView.Adapter<MainActivity.ViewHolder> {
 
