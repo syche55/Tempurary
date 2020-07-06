@@ -50,7 +50,9 @@ Get current user's stickers he/she sent.
 - [x] Update layout - different device size screen, orientation
 
 ## Work on Sending Notification
-- Waiting
+[driver: Siyu Chen]
+- [x] Create vibration effect for receving new messages
+
 
 
 ## Work on Main activity Logic & layout
