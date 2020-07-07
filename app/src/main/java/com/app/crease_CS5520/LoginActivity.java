@@ -46,7 +46,7 @@ public class LoginActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
-
+        typeUsername = (EditText) findViewById(R.id.typeUsername);
     }
     // activity when clicking "login" button
     public void clickLogin(View view) {
