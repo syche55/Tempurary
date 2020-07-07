@@ -8,8 +8,8 @@
 
     <ListView
         android:id="@+id/stickersHistory"
-        android:layout_width="320dp"
-        android:layout_height="480dp"
+        android:layout_width="480dp"
+        android:layout_height="304dp"
         android:layout_marginTop="16dp"
         android:background="@drawable/button"
         app:layout_constraintEnd_toEndOf="parent"
