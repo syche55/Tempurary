@@ -6,6 +6,7 @@
     android:layout_height="match_parent"
     tools:context=".MainActivity">
 
+
     <Button
         android:id="@+id/getHistory"
         android:layout_width="160dp"
@@ -29,11 +30,74 @@
         android:layout_marginEnd="24dp"
         android:fontFamily="@font/bold"
         android:gravity="center"
+    <TextView
+        android:id="@+id/chatHistoryTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:layout_marginEnd="24dp"
+        android:text="@string/chat_history"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/chatRecyclerView"
+        android:layout_width="102dp"
+        android:layout_height="99dp"
+        android:layout_marginEnd="12dp"
+        android:layout_marginBottom="50dp"
+        app:layout_constraintBottom_toTopOf="@+id/emojiPrompt"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/chatHistoryTitle"
+        app:layout_constraintVertical_bias="0.0" />
+
+    <ListView
+        android:id="@+id/stickerView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintHorizontal_bias="0.493"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/getHistory" />
+
+    <TextView
+        android:id="@+id/emojiPrompt"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="51dp"
+        android:layout_marginTop="24dp"
+        android:layout_marginEnd="51dp"
+        android:text="@string/tap_a_emoji_below_to_send_a_new_message"
+        app:layout_constraintEnd_toEndOf="@+id/displayNum"
+        app:layout_constraintHorizontal_bias="0.0"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/otherSticker" />
+
+    <Button
+        android:id="@+id/getHistory"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginEnd="268dp"
+        android:layout_marginBottom="11dp"
+        android:text="@string/get_history"
+        app:layout_constraintBottom_toTopOf="@+id/stickerView"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <TextView
+        android:id="@+id/displayNum"
+        android:layout_width="134dp"
+        android:layout_height="0dp"
+        android:layout_marginBottom="236dp"
         android:text="@string/you_ve_sent_0"
         android:textColor="@color/colorBlack"
         android:textSize="14sp"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/chatRecyclerView" />
+        app:layout_constraintHorizontal_bias="0.812"
+        app:layout_constraintStart_toStartOf="parent" />
 
     <TextView
         android:id="@+id/otherUser"
