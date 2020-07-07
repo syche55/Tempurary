@@ -6,7 +6,7 @@
     <string name="default_notification_channel_id">Default Notification Channel Id</string>
     <string name="how_many_stickers_you_has_sent">how many stickers you has sent</string>
     <string name="stickers_you_ve_sent">Stickers You\'ve Sent</string>
-    <string name="log_in">log in</string>
+    <string name="log_in">Log In</string>
     <string name="type_username">type username</string>
     <string name="send">send</string>
     <string name="get_history">Get History</string>
