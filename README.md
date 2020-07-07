@@ -52,8 +52,7 @@ Get current user's stickers he/she sent.
 ## Work on Sending Notification
 [driver: Siyu Chen]
 - [x] Create vibration effect for receving new messages
-
-
+- [x] Add notification push feature
 
 ## Work on Main activity Logic & layout
 Need to update new main layout since requirement on piazza:
@@ -65,3 +64,8 @@ Show a selection of sticker pictures, and the user taps on one of the stickers.
 - [x] Show stickers collections
 - [x] allow user tap stickers and send 
 - [x] Adapt to FireBase login username
+
+## Bugs Fix
+- [x] Fix landscape change crash bug [driver: Zongwei Fan]
+- [x] Fix notification push bugs [driver: Siyu Chen]
+- [x] Update UI feature [driver: Jing Shen]
