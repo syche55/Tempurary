@@ -1,14 +1,17 @@
 package com.app.crease_CS5520;
 
-import android.app.Activity;
-import android.app.Service;
+import android.app.ActivityManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.Intent;
-import android.media.AudioAttributes;
+import android.graphics.BitmapFactory;
+import android.os.Build;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.NotificationCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -23,17 +26,13 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.app.crease_CS5520.data.model.Stickers;
 import com.app.crease_CS5520.data.model.User;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -41,11 +40,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.iid.FirebaseInstanceId;
 import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessaging;
-import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
 
 
@@ -55,22 +52,21 @@ import org.json.JSONObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.Array;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
 
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
 
-    private FirebaseAuth mAuth;
-
     private static final String SERVER_KEY = "AAAA2hXlUTA:APA91bFhRbEipDF4z0LT4DJUC05x5hfL2yFXohyw4KyTQ0OVV349roAvnSPjiwGtrSUI-VO8b3IF55V6itrf-Y5FCtkAXHYq7dw066uqNA7C16UANOysccvY0SJfwrtW0x6LmAcx8UD8";
+    private static final String CHANNEL_ID = "newMessage";
     private DatabaseReference mDatabase;
     private TextView otherSticker;
     private Button sendSticker;
@@ -79,13 +75,17 @@ public class MainActivity extends AppCompatActivity {
     private String username;
     private User signOnUser;
     private ListView stickerView;
-    private ArrayAdapter<String> adapter;
+    private ArrayAdapter<String> adapterStickers;
     private ArrayList<String> stickerContainer;
     private ArrayList<String> chatHistory;
-    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.Adapter adapterChatHistory;
     private RecyclerView recyclerView;
     private Vibrator vibrator;
-
+    private NotificationManager mNotificationManager;
+    private NotificationCompat.Builder mBuilder;
+    private ActivityManager activityManager;
+    private String packageName;
+    private boolean stop = false;
 
 
     @Override
@@ -95,8 +95,10 @@ public class MainActivity extends AppCompatActivity {
 
         // init sticker view
         otherSticker = (TextView) findViewById(R.id.otherSticker);
+
         // init database
         mDatabase = FirebaseDatabase.getInstance().getReference();
+
         // init stickers number display
         displayNum = (TextView) findViewById(R.id.displayNum);
 
@@ -105,9 +107,6 @@ public class MainActivity extends AppCompatActivity {
         username = mIntent.getExtras().getString("username");
 
         // first check if user already in database
-
-
-
         mDatabase.child("users").orderByKey().equalTo(username).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -115,8 +114,6 @@ public class MainActivity extends AppCompatActivity {
                 signOnUser = user;
                 mDatabase.child("users").child(username).setValue(signOnUser);
                 displayNum.setText("Total number of stickers sent: "+String.valueOf(user.history.size()));
-                // automatically subscribe to news topic
-
             }
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
@@ -137,6 +134,7 @@ public class MainActivity extends AppCompatActivity {
         if (signOnUser == null) {
             signOnUser = new User(username);
             mDatabase.child("users").child(username).setValue(signOnUser);
+            // automatically subscribe to news topic
             FirebaseMessaging.getInstance().subscribeToTopic("news")
                     .addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
@@ -161,46 +159,26 @@ public class MainActivity extends AppCompatActivity {
 
                             // Get new Instance ID token
                             String token = task.getResult().getToken();
-
-                            Log.d(TAG, "token"+token);
-//
-//                            // Log and toast
-//                            String msg = getString(R.string.msg_token_fmt, token);
-//                            Log.d(TAG, msg);
-//                            Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+                            Log.d(TAG, "token: "+token);
                         }
                     });
         }
 
+        //Log.e(TAG, "history size is " + signOnUser.history.size());
 
-        Log.e(TAG, "history size is " + signOnUser.history.size());
-
-
-        // create user sticker view
+        // create user sticker view, user chooses stickers from here
         stickerView = findViewById(R.id.stickerView);
         stickerContainer=new ArrayList<>(signOnUser.userSticker.defaultStickerGroup.values());
-        adapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, stickerContainer);
+        adapterStickers = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, stickerContainer);
+        stickerView.setAdapter(adapterStickers);
 
-
+        // create user chat history view, including other users' messages
         chatHistory = new ArrayList<>();
-
-
         recyclerView = (RecyclerView) findViewById(R.id.chatRecyclerView);
-//        recyclerView.setHasFixedSize(true);
         LinearLayoutManager layoutManager = new LinearLayoutManager(this);
-//        layoutManager.setOrientation(LinearLayoutManager.VERTICAL);
         recyclerView.setLayoutManager(layoutManager);
-
-        mAdapter = new MyAdapter(MainActivity.this, chatHistory);
-        recyclerView.setAdapter(mAdapter);
-
-
-
-        stickerView.setAdapter(adapter);
-        //adapter.notifyDataSetChanged();
-
-
-
+        adapterChatHistory = new MyAdapter(MainActivity.this, chatHistory);
+        recyclerView.setAdapter(adapterChatHistory);
 
         // get history button
         getHistory = (Button)findViewById(R.id.getHistory);
@@ -211,11 +189,10 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-        // vibration
+        // initiate vibrator
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
-
-
+        // add users ChildEventListener
         mDatabase.child("users").addChildEventListener(
                 new ChildEventListener() {
                     @Override
@@ -232,7 +209,6 @@ public class MainActivity extends AppCompatActivity {
                             signOnUser = user;
                         }
                         // display username and sticker
-
                         String display = user.history.size() > 0 ? user.username + ": " + user.history.get(user.history.size() - 1) : "";
                         otherSticker.setText(display);
 
@@ -243,21 +219,29 @@ public class MainActivity extends AppCompatActivity {
                         } else {
                             Log.e(TAG, "No vibrator");
                         }
+                        // when user receives new messages from other users and app in background
+                        if (!user.username.equalsIgnoreCase(username) && !appOnForeground()) {
+                            mBuilder = new NotificationCompat.Builder(MainActivity.this, CHANNEL_ID)
+                                    .setContentTitle("Crease New Message")
+                                    .setContentText(display)
+                                    .setWhen(System.currentTimeMillis())
+                                    .setSmallIcon(R.mipmap.ic_launcher)
+                                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                            //via builder.build() we get the notification
+                            mNotificationManager.notify(1, mBuilder.build());
+                        }
+                        // update chat history
                         chatHistory.add(display);
-                        mAdapter.notifyDataSetChanged();
-                        recyclerView.scrollToPosition(mAdapter.getItemCount()-1);
-
-
+                        adapterChatHistory.notifyDataSetChanged();
+                        recyclerView.scrollToPosition(adapterChatHistory.getItemCount()-1);
                     }
 
                     @Override
                     public void onChildRemoved(DataSnapshot dataSnapshot) {
-
                     }
 
                     @Override
                     public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-
                     }
 
                     @Override
@@ -267,6 +251,7 @@ public class MainActivity extends AppCompatActivity {
                 }
         );
 
+        // add OnItemClickListener for user tapping stickers
         stickerView.setOnItemClickListener(new AdapterView.OnItemClickListener(){
             @Override
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -279,64 +264,64 @@ public class MainActivity extends AppCompatActivity {
                         key=entry.getKey();
                     }
                 }
-
-                // send and display
+                // send to database and display
                 MainActivity.this.onSendSticker(mDatabase, key);
             }
         });
+
+        // notification manager for notification push
+        mNotificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        createNotificationChannel();
+
+        // activity manager for app running in background check
+        activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        packageName = this.getPackageName();
+        new Thread(new AppStatus()).start();
     }
 
+    /**
+     * Called on score add
+     * @param postRef
+     */
+    // --> tap stickers and send
+    private void onSendSticker(final DatabaseReference postRef, final String stickerID) {
+        postRef
+                .child("users")
+                .child(username)
+                .runTransaction(new Transaction.Handler() {
+                    @Override
+                    public Transaction.Result doTransaction(MutableData mutableData) {
+                        User u = mutableData.getValue(User.class);
 
-    class MyAdapter extends RecyclerView.Adapter<MainActivity.ViewHolder> {
+                        // add to history
+                        if (stickerID == null) Log.d(TAG, "input string empty");
+                        u.history.add(u.userSticker.defaultStickerGroup.get(stickerID));
 
-        private Context context;
-        private List<String> list;
+                        // display sticker
+                        String display = username + ": " + u.history.get(u.history.size() - 1);
+                        otherSticker.setText(display);
 
-        public MyAdapter(Context context, List<String> list) {
-            this.context = context;
-            this.list = list;
-        }
-
-        @Override
-        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
-            return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.item_recycler, parent, false));
-        }
-
-        @Override
-        public void onBindViewHolder(ViewHolder holder, int position) {
-            Log.d(TAG, "onBindViewHolder: " + list.size());
-            Log.d(TAG, "Item is " + list.get(position));
-            holder.vText.setText(list.get(position));
-        }
+                        // send message to news subscribe users
+                        sendMessageToNews(display);
 
 
-        @Override
-        public int getItemCount() {
-            return list == null ? 0 : list.size();
-        }
+                        // display number of stickers sent
+                        displayNum.setText("Total number of stickers sent: "+String.valueOf(u.history.size()));
+
+                        mutableData.setValue(u);
+                        return Transaction.success(mutableData);
+                    }
+
+                    @Override
+                    public void onComplete(DatabaseError databaseError, boolean b,
+                                           DataSnapshot dataSnapshot) {
+                        // transaction completed
+                        Log.d(TAG, "postTransaction:onComplete:" + databaseError);
+                    }
+                });
     }
 
-    class ViewHolder extends RecyclerView.ViewHolder {
-        TextView vText;
-        public ViewHolder(View itemView) {
-            super(itemView);
-            vText = (TextView) itemView.findViewById(R.id.historyItem);
-        }
-    }
-
-
-
-
-
-//    public void sendMessageToNews(View type) {
-//        new Thread(new Runnable() {
-//            @Override
-//            public void run() {
-//                sendMessageToNews();
-//            }
-//        }).start();
-//    }
-
+    // user message sent to database - news topic subscribe users
     private void sendMessageToNews(String newMessage){
         JSONObject jPayload = new JSONObject();
         JSONObject jNotification = new JSONObject();
@@ -375,7 +360,6 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void run() {
                     Log.e(TAG, "run: " + resp);
-                    Toast.makeText(MainActivity.this,"response was: " + resp,Toast.LENGTH_LONG).show();
                 }
             });
         } catch (JSONException | IOException e) {
@@ -383,64 +367,110 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-
-
+    // user stickers history in new page
     public void getHistory(String username) {
         // parse current sign on user stickers history to showHistory page
         Intent showHistoryIntent = new Intent(MainActivity.this, ShowHistory.class);
         showHistoryIntent.putExtra("showHistoryParse", signOnUser.history);
         showHistoryIntent.putExtra("username", username);
-
         startActivity(showHistoryIntent);
     }
 
-
-    /**
-     * Called on score add
-     * @param postRef
-     */
-    // --> tap stickers and send
-    private void onSendSticker(final DatabaseReference postRef, final String stickerID) {
-        postRef
-                .child("users")
-                .child(username)
-                .runTransaction(new Transaction.Handler() {
-                    @Override
-                    public Transaction.Result doTransaction(MutableData mutableData) {
-                        User u = mutableData.getValue(User.class);
-
-                        // add to history
-                        if (stickerID == null) Log.d(TAG, "input string empty");
-                        u.history.add(u.userSticker.defaultStickerGroup.get(stickerID));
-
-                        // display sticker
-                        String display = username + ": " + u.history.get(u.history.size() - 1);
-                        otherSticker.setText(display);
-
-                        sendMessageToNews(display);
-
-
-                        // display number of stickers sent
-                        displayNum.setText("Total number of stickers sent: "+String.valueOf(u.history.size()));
-
-                        mutableData.setValue(u);
-                        return Transaction.success(mutableData);
-                    }
-
-                    @Override
-                    public void onComplete(DatabaseError databaseError, boolean b,
-                                           DataSnapshot dataSnapshot) {
-                        // transaction completed
-                        Log.d(TAG, "postTransaction:onComplete:" + databaseError);
-                    }
-                });
+    // notification channel
+    private void createNotificationChannel() {
+        // Create the NotificationChannel, but only on API 26+ because
+        // the NotificationChannel class is new and not in the support library
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            CharSequence name = getString(R.string.app_name);
+            String description = getString(R.string.app_name);
+            int importance = NotificationManager.IMPORTANCE_HIGH;
+            NotificationChannel channel = new NotificationChannel(CHANNEL_ID, name, importance);
+            channel.setDescription(description);
+            // Register the channel with the system; you can't change the importance
+            // or other notification behaviors after this
+            NotificationManager notificationManager = getSystemService(NotificationManager.class);
+            notificationManager.createNotificationChannel(channel);
+        }
     }
 
+    // RecyclerView adapter
+    class MyAdapter extends RecyclerView.Adapter<MainActivity.ViewHolder> {
+        private Context context;
+        private List<String> list;
 
+        public MyAdapter(Context context, List<String> list) {
+            this.context = context;
+            this.list = list;
+        }
+        @Override
+        public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+            return new ViewHolder(LayoutInflater.from(context).inflate(R.layout.item_recycler, parent, false));
+        }
+        @Override
+        public void onBindViewHolder(ViewHolder holder, int position) {
+//            Log.d(TAG, "onBindViewHolder: " + list.size());
+//            Log.d(TAG, "Item is " + list.get(position));
+            holder.vText.setText(list.get(position));
+        }
+        @Override
+        public int getItemCount() {
+            return list == null ? 0 : list.size();
+        }
+    }
 
+    // RecyclerView view holder
+    class ViewHolder extends RecyclerView.ViewHolder {
+        TextView vText;
+        public ViewHolder(View itemView) {
+            super(itemView);
+            vText = (TextView) itemView.findViewById(R.id.historyItem);
+        }
+    }
     private String convertStreamToString(InputStream is) {
         Scanner s = new Scanner(is).useDelimiter("\\A");
         return s.hasNext() ? s.next().replace(",", ",\n") : "";
+    }
+
+
+    // app running in background status check
+    private class AppStatus implements Runnable {
+        @Override
+        public void run() {
+            stop = false;
+
+            while (!stop) {
+                try {
+                    if (appOnForeground()) {
+                        System.out.println("当前App处于前台");
+                    } else {
+                        System.out.println("当前App处于后台");
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+
+                try {
+                    TimeUnit.SECONDS.sleep(1);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+    }
+
+    private boolean appOnForeground() {
+        List<ActivityManager.RunningAppProcessInfo> appProcesses = activityManager.getRunningAppProcesses();
+
+        if (appProcesses == null)
+            return false;
+
+        for (ActivityManager.RunningAppProcessInfo appProcess : appProcesses) {
+            if (appProcess.processName.equals(packageName) && appProcess.importance == ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 
