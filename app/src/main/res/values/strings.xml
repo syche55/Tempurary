@@ -17,4 +17,6 @@
     <string name="msg_subscribe_failed">Subscribe Failed</string>
     <string name="chat_history">Chat History</string>
     <string name="tap_a_emoji_below_to_send_a_new_message">Tap a emoji below to send a new message</string>
+    <string name="todo">TODO</string>
+    <string name="created_by_crease_team">Created By: Crease Team</string>
 </resources>
