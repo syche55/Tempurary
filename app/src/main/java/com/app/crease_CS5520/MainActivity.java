@@ -42,8 +42,12 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.MutableData;
 import com.google.firebase.database.Transaction;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.iid.FirebaseInstanceId;
+import com.google.firebase.iid.InstanceIdResult;
 import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.FirebaseMessagingService;
 import com.google.firebase.messaging.RemoteMessage;
+
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -102,6 +106,8 @@ public class MainActivity extends AppCompatActivity {
 
         // first check if user already in database
 
+
+
         mDatabase.child("users").orderByKey().equalTo(username).addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
@@ -109,6 +115,8 @@ public class MainActivity extends AppCompatActivity {
                 signOnUser = user;
                 mDatabase.child("users").child(username).setValue(signOnUser);
                 displayNum.setText("Total number of stickers sent: "+String.valueOf(user.history.size()));
+                // automatically subscribe to news topic
+
             }
             @Override
             public void onChildChanged(DataSnapshot dataSnapshot, String s) {
@@ -129,7 +137,41 @@ public class MainActivity extends AppCompatActivity {
         if (signOnUser == null) {
             signOnUser = new User(username);
             mDatabase.child("users").child(username).setValue(signOnUser);
+            FirebaseMessaging.getInstance().subscribeToTopic("news")
+                    .addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            String msg = getString(R.string.msg_subscribed);
+                            if (!task.isSuccessful()) {
+                                msg = getString(R.string.msg_subscribe_failed);
+                            }
+                            Log.d(TAG, msg);
+                            Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+            FirebaseInstanceId.getInstance().getInstanceId()
+                    .addOnCompleteListener(new OnCompleteListener<InstanceIdResult>() {
+                        @Override
+                        public void onComplete(@NonNull Task<InstanceIdResult> task) {
+                            if (!task.isSuccessful()) {
+                                Log.w(TAG, "getInstanceId failed", task.getException());
+                                return;
+                            }
+
+                            // Get new Instance ID token
+                            String token = task.getResult().getToken();
+
+                            Log.d(TAG, "token"+token);
+//
+//                            // Log and toast
+//                            String msg = getString(R.string.msg_token_fmt, token);
+//                            Log.d(TAG, msg);
+//                            Toast.makeText(MainActivity.this, msg, Toast.LENGTH_SHORT).show();
+                        }
+                    });
         }
+
 
         Log.e(TAG, "history size is " + signOnUser.history.size());
 
@@ -157,19 +199,7 @@ public class MainActivity extends AppCompatActivity {
         stickerView.setAdapter(adapter);
         //adapter.notifyDataSetChanged();
 
-        // automatically subscribe to news topic
-        FirebaseMessaging.getInstance().subscribeToTopic("news")
-                .addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        String msg = getString(R.string.msg_subscribed);
-                        if (!task.isSuccessful()) {
-                            msg = getString(R.string.msg_subscribe_failed);
-                        }
-                        Log.d(TAG, msg);
-                        Toast.makeText(MainActivity.this, msg, Toast.LENGTH_LONG).show();
-                    }
-                });
+
 
 
         // get history button
@@ -298,21 +328,21 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-    public void sendMessageToNews(View type) {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                sendMessageToNews();
-            }
-        }).start();
-    }
+//    public void sendMessageToNews(View type) {
+//        new Thread(new Runnable() {
+//            @Override
+//            public void run() {
+//                sendMessageToNews();
+//            }
+//        }).start();
+//    }
 
-    private void sendMessageToNews(){
+    private void sendMessageToNews(String newMessage){
         JSONObject jPayload = new JSONObject();
         JSONObject jNotification = new JSONObject();
         try {
             jNotification.put("message", "This is a Firebase Cloud Messaging topic \"news\" message!");
-            jNotification.put("body", "News Body");
+            jNotification.put("body", newMessage);
             jNotification.put("sound", "default");
             jNotification.put("badge", "1");
             jNotification.put("click_action", "OPEN_ACTIVITY_1");
@@ -327,7 +357,7 @@ public class MainActivity extends AppCompatActivity {
             URL url = new URL("https://fcm.googleapis.com/fcm/send");
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
-            conn.setRequestProperty("Authorization", SERVER_KEY);
+            conn.setRequestProperty("Authorization", "key=" + SERVER_KEY);
             conn.setRequestProperty("Content-Type", "application/json");
             conn.setDoOutput(true);
 
@@ -354,6 +384,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
+
     public void getHistory(String username) {
         // parse current sign on user stickers history to showHistory page
         Intent showHistoryIntent = new Intent(MainActivity.this, ShowHistory.class);
@@ -369,7 +400,7 @@ public class MainActivity extends AppCompatActivity {
      * @param postRef
      */
     // --> tap stickers and send
-    private void onSendSticker(DatabaseReference postRef, final String stickerID) {
+    private void onSendSticker(final DatabaseReference postRef, final String stickerID) {
         postRef
                 .child("users")
                 .child(username)
@@ -385,6 +416,8 @@ public class MainActivity extends AppCompatActivity {
                         // display sticker
                         String display = username + ": " + u.history.get(u.history.size() - 1);
                         otherSticker.setText(display);
+
+                        sendMessageToNews(display);
 
 
                         // display number of stickers sent
@@ -402,6 +435,8 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
     }
+
+
 
     private String convertStreamToString(InputStream is) {
         Scanner s = new Scanner(is).useDelimiter("\\A");
