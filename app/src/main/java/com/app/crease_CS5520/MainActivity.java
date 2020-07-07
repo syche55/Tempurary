@@ -441,9 +441,9 @@ public class MainActivity extends AppCompatActivity {
             while (!stop) {
                 try {
                     if (appOnForeground()) {
-                        System.out.println("当前App处于前台");
+                        System.out.println("App is running on foreground");
                     } else {
-                        System.out.println("当前App处于后台");
+                        System.out.println("App is running on background");
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
