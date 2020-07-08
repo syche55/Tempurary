@@ -60,7 +60,7 @@
 
     <TextView
         android:id="@+id/displayNum"
-        android:layout_width="240dp"
+        android:layout_width="256dp"
         android:layout_height="32dp"
         android:layout_marginTop="320dp"
         android:text="@string/you_ve_sent_0"
@@ -95,7 +95,7 @@
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
         android:fontFamily="@font/bold"
-        android:text="@string/tap_a_emoji_below_to_send_a_new_message"
+        android:text="@string/tap_a_sticker_below_to_send_a_new_message"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/getHistory" />

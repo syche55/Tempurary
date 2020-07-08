@@ -1,7 +1,6 @@
 <resources>
     <string name="app_name">Crease</string>
     <string name="send_the_sticker">send the sticker</string>
-    <string name="enter_a_sticker_id_1_3">enter a sticker id (1 - 3)</string>
     <string name="get_the_history">get the history</string>
     <string name="default_notification_channel_id">Default Notification Channel Id</string>
     <string name="how_many_stickers_you_has_sent">how many stickers you has sent</string>
@@ -9,14 +8,14 @@
     <string name="log_in">Log In</string>
     <string name="type_username">type username</string>
     <string name="send">send</string>
-    <string name="get_history">Get History</string>
+    <string name="get_history">Get History </string>
     <string name="you_ve_sent_0">Total number of stickers sent: 0</string>
-    <string name="other">New Message: </string>
+    <string name="other">New Message </string>
     <string name="_1">1</string>
     <string name="msg_subscribed">Subscribed</string>
     <string name="msg_subscribe_failed">Subscribe Failed</string>
     <string name="chat_history">Chat History</string>
-    <string name="tap_a_emoji_below_to_send_a_new_message">Tap a emoji below to send a new message</string>
+    <string name="tap_a_sticker_below_to_send_a_new_message">Tap a sticker below to send a new message</string>
     <string name="todo">TODO</string>
     <string name="created_by_crease_team">Created By: Crease Team</string>
 </resources>
