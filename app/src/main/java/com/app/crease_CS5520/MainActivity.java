@@ -1,6 +1,7 @@
 package com.app.crease_CS5520;
 
 import android.app.ActivityManager;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -235,28 +236,35 @@ public class MainActivity extends AppCompatActivity {
                         }
                         // when user receives new messages from other users and app in background
                         if (!user.username.equalsIgnoreCase(username) && !appOnForeground()) {
-                            // go to main page when clicking the notification
+                          // go to main page when clicking the notification
+
                             Context context = getApplicationContext();
-                            Intent intent = new Intent(context, MainActivity.class);
+                            Intent intent = new Intent(context, LoginActivity.class);
                             PendingIntent pIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), intent, 0);
 
-                            PendingIntent callIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(),
-                                    new Intent(context, MainActivity.class), 0);
+                            PendingIntent callIntent = PendingIntent.getActivity(context, (int)System.currentTimeMillis(),
+                                    new Intent(context, LoginActivity.class), 0);
 
-                            mBuilder = new NotificationCompat.Builder(MainActivity.this, CHANNEL_ID)
+                            // send notification
+                            Notification noti = new NotificationCompat.Builder(context, CHANNEL_ID)
+
                                     .setContentTitle("Crease New Message")
                                     .setContentText(display)
-                                    .setWhen(System.currentTimeMillis())
                                     .setSmallIcon(R.mipmap.ic_launcher)
-                                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                            //via builder.build() we get the notification
-                            mNotificationManager.notify(1, mBuilder.build());
+                                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher))
+                                    .addAction(R.mipmap.ic_launcher, "Call", callIntent).setContentIntent(pIntent).build();
+
+                            // hide the notification after its selected
+                            noti.flags |= Notification.FLAG_AUTO_CANCEL;
+
+                            mNotificationManager.notify(1, noti);
                         }
                         // update chat history
                         chatHistory.add(display);
                         adapterChatHistory.notifyDataSetChanged();
                         recyclerView.scrollToPosition(adapterChatHistory.getItemCount() - 1);
                     }
+
 
                     @Override
                     public void onChildRemoved(DataSnapshot dataSnapshot) {
