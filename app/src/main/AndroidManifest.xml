@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.app.crease_CS5520">
 
     <uses-permission android:name="android.permission.INTERNET" />
@@ -27,6 +28,9 @@
             </intent-filter>
         </service>
 
+
+
+
         <activity android:name=".LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -35,12 +39,20 @@
             </intent-filter>
         </activity>
         <activity android:name=".ShowHistory" />
-        <activity android:name=".MainActivity">
+
+
+
+        <activity android:name=".MainActivity" android:configChanges="orientation|screenSize">
+
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
+
             </intent-filter>
         </activity>
+
+
 
         <service
             android:name=".MainActivity"
