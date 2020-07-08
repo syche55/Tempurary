@@ -1,5 +1,6 @@
 package com.app.crease_CS5520;
 
+import android.annotation.SuppressLint;
 import android.app.ActivityManager;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -90,6 +91,8 @@ public class MainActivity extends AppCompatActivity {
     private boolean stop = false;
     private LinearLayoutManager layoutManager;
 
+    private ChildEventListener childEventListener;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -111,11 +114,12 @@ public class MainActivity extends AppCompatActivity {
         Intent mIntent = getIntent();
         username = mIntent.getExtras().getString("username");
 
-        // 
+        // retrieve user information
         DatabaseReference userNameRef = mDatabase.child("users").child(username);
 
         // check if user in the database
         ValueEventListener eventListener = new ValueEventListener() {
+            @SuppressLint("SetTextI18n")
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 if (!dataSnapshot.exists()) {
@@ -151,13 +155,13 @@ public class MainActivity extends AppCompatActivity {
                                 }
                             });
 
-                    Log.d(TAG,"username="+signOnUser.username);
-                }
-                else {
+                    Log.d(TAG, "username=" + signOnUser.username);
+                } else {
+                    // if no user in db, create new user
                     User user = dataSnapshot.getValue(User.class);
                     signOnUser = user;
                     displayNum.setText("Total number of stickers sent: " + String.valueOf(user.history.size()));
-                    Log.d(TAG,signOnUser.username);
+                    Log.d(TAG, signOnUser.username);
                 }
                 stickerContainer.addAll(signOnUser.userSticker.defaultStickerGroup.values());
                 adapterStickers.notifyDataSetChanged();
@@ -165,18 +169,13 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                Log.d(TAG, databaseError.getMessage()); //Don't ignore errors!
+                Log.d(TAG, databaseError.getMessage());
             }
         };
         userNameRef.addListenerForSingleValueEvent(eventListener);
 
 
-
-        //Log.e(TAG, "history size is " + signOnUser.history.size());
-
-
         // create user sticker view, user chooses stickers from here
-
         stickerView = findViewById(R.id.stickerView);
         adapterStickers = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, stickerContainer);
         stickerView.setAdapter(adapterStickers);
@@ -186,8 +185,11 @@ public class MainActivity extends AppCompatActivity {
         recyclerView = (RecyclerView) findViewById(R.id.chatRecyclerView);
         if (savedInstanceState != null && savedInstanceState.getStringArrayList("data") != null) {
             chatHistory = savedInstanceState.getStringArrayList("data");
+            Log.d(TAG, "load history from saved instance:" + chatHistory.toString());
         } else {
             chatHistory = new ArrayList<>();
+            Log.d(TAG, "created new chat history ");
+
         }
         layoutManager = new LinearLayoutManager(this);
         recyclerView.setLayoutManager(layoutManager);
@@ -207,71 +209,72 @@ public class MainActivity extends AppCompatActivity {
         vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
 
         // add users ChildEventListener
-        mDatabase.child("users").addChildEventListener(
-                new ChildEventListener() {
-                    @Override
-                    public void onChildAdded(DataSnapshot dataSnapshot, String s) {
-                        // test if node added correctly
-                        Log.e(TAG, "onChildAdded: dataSnapshot = " + dataSnapshot.getValue());
-                    }
+        childEventListener = new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                // test if node added correctly
+                Log.e(TAG, "onChildAdded: dataSnapshot = " + dataSnapshot.getValue());
+            }
 
-                    @Override
-                    public void onChildChanged(DataSnapshot dataSnapshot, String s) {
-                        User user = dataSnapshot.getValue(User.class);
-                        // check if the change made is the login user
-                        if (user.username.equalsIgnoreCase(username)) {
-                            signOnUser = user;
-                        }
-                        // display username and sticker
-                        String display = user.history.size() > 0 ? user.username + ": " + user.history.get(user.history.size() - 1) : "";
-                        otherSticker.setText(display);
-
-                        // when user receives new messages from other users, vibrate
-                        if (!user.username.equalsIgnoreCase(username) && vibrator != null && vibrator.hasVibrator()) {
-                            VibrationEffect effect = VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE);
-                            vibrator.vibrate(effect);
-                        } else {
-                            Log.e(TAG, "No vibrator");
-                        }
-                        // when user receives new messages from other users and app in background
-                        if (!user.username.equalsIgnoreCase(username) && !appOnForeground()) {
-                            // go to main page when clicking the notification
-                            Context context = getApplicationContext();
-                            Intent intent = new Intent(context, MainActivity.class);
-                            PendingIntent pIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), intent, 0);
-
-                            PendingIntent callIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(),
-                                    new Intent(context, MainActivity.class), 0);
-
-                            mBuilder = new NotificationCompat.Builder(MainActivity.this, CHANNEL_ID)
-                                    .setContentTitle("Crease New Message")
-                                    .setContentText(display)
-                                    .setWhen(System.currentTimeMillis())
-                                    .setSmallIcon(R.mipmap.ic_launcher)
-                                    .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
-                            //via builder.build() we get the notification
-                            mNotificationManager.notify(1, mBuilder.build());
-                        }
-                        // update chat history
-                        chatHistory.add(display);
-                        adapterChatHistory.notifyDataSetChanged();
-                        recyclerView.scrollToPosition(adapterChatHistory.getItemCount() - 1);
-                    }
-
-                    @Override
-                    public void onChildRemoved(DataSnapshot dataSnapshot) {
-                    }
-
-                    @Override
-                    public void onChildMoved(DataSnapshot dataSnapshot, String s) {
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-                        Log.e(TAG, "onCancelled:" + databaseError);
-                    }
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                Log.e(TAG, "Call onChildChange of database");
+                User user = dataSnapshot.getValue(User.class);
+                // check if the change made is the login user
+                if (user.username.equalsIgnoreCase(username)) {
+                    signOnUser = user;
                 }
-        );
+                // display username and sticker
+                String display = user.history.size() > 0 ? user.username + ": " + user.history.get(user.history.size() - 1) : "";
+                otherSticker.setText(display);
+
+                // when user receives new messages from other users, vibrate
+                if (!user.username.equalsIgnoreCase(username) && vibrator != null && vibrator.hasVibrator()) {
+                    VibrationEffect effect = VibrationEffect.createOneShot(200, VibrationEffect.DEFAULT_AMPLITUDE);
+                    vibrator.vibrate(effect);
+                } else {
+                    Log.e(TAG, "No vibrator");
+                }
+                // when user receives new messages from other users and app in background
+                if (!user.username.equalsIgnoreCase(username) && !appOnForeground()) {
+                    // go to main page when clicking the notification
+                    Context context = getApplicationContext();
+                    Intent intent = new Intent(context, MainActivity.class);
+                    PendingIntent pIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(), intent, 0);
+
+                    PendingIntent callIntent = PendingIntent.getActivity(context, (int) System.currentTimeMillis(),
+                            new Intent(context, MainActivity.class), 0);
+
+                    mBuilder = new NotificationCompat.Builder(MainActivity.this, CHANNEL_ID)
+                            .setContentTitle("Crease New Message")
+                            .setContentText(display)
+                            .setWhen(System.currentTimeMillis())
+                            .setSmallIcon(R.mipmap.ic_launcher)
+                            .setLargeIcon(BitmapFactory.decodeResource(getResources(), R.mipmap.ic_launcher));
+                    //via builder.build() we get the notification
+                    mNotificationManager.notify(1, mBuilder.build());
+                }
+                // update chat history
+                chatHistory.add(display);
+                Log.d(TAG, "add one display to chatHistory " + display);
+                adapterChatHistory.notifyDataSetChanged();
+                recyclerView.scrollToPosition(adapterChatHistory.getItemCount() - 1);
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Log.e(TAG, "onCancelled:" + databaseError);
+            }
+        };
+        mDatabase.child("users").addChildEventListener(childEventListener);
 
         // add OnItemClickListener for user tapping stickers
         stickerView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -279,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
             public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
                 // Get the selected item text from ListView
                 String selectedItem = (String) parent.getItemAtPosition(position);
-                Log.d(TAG, selectedItem);
+                Log.d(TAG, "Sticker select: " + selectedItem);
                 String key = "";
                 for (Map.Entry<String, String> entry : signOnUser.userSticker.defaultStickerGroup.entrySet()) {
                     if (entry.getValue().equals(selectedItem)) {
@@ -299,6 +302,13 @@ public class MainActivity extends AppCompatActivity {
         activityManager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
         packageName = this.getPackageName();
         new Thread(new AppStatus()).start();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // remove event listener to avoid duplicate listener, especially for screen rotation
+        mDatabase.child("users").removeEventListener(childEventListener);
     }
 
     @Override
@@ -338,6 +348,7 @@ public class MainActivity extends AppCompatActivity {
                         displayNum.setText("Total number of stickers sent: " + String.valueOf(u.history.size()));
 
                         mutableData.setValue(u);
+                        Log.d(TAG, "Sending sticker: " + display);
                         return Transaction.success(mutableData);
                     }
 
@@ -396,27 +407,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-//    private void onScreenChanged(Configuration newConfig) {
-//        if (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE) {
-//            //横屏
-//            //recyclerView.setLayoutManager(layoutManager);
-//        }else {
-//            //竖屏
-//            //recyclerView.setLayoutManager(layoutManager);
-//        }
-//    }
-
-//    @Override
-//    public void onConfigurationChanged(Configuration newConfig) {
-//        super.onConfigurationChanged(newConfig);
-//        onScreenChanged(newConfig);
-//    }
-
-//    @Override
-//    protected void onSaveInstanceState(Bundle outState) {
-//        super.onSaveInstanceState(outState);
-//        outState.putStringArrayList("data", chatHistory);
-//    }
+    // save state
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.e(TAG, "saving chatHistory" + chatHistory.toString());
+        outState.putStringArrayList("data", chatHistory);
+    }
 
 
     // user stickers history in new page
@@ -462,8 +459,6 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onBindViewHolder(ViewHolder holder, int position) {
-//            Log.d(TAG, "onBindViewHolder: " + list.size());
-//            Log.d(TAG, "Item is " + list.get(position));
             holder.vText.setText(list.get(position));
         }
 
@@ -494,18 +489,16 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public void run() {
             stop = false;
-
             while (!stop) {
                 try {
                     if (appOnForeground()) {
-                        System.out.println("App is running on foreground");
+                        // do nothing
                     } else {
-                        System.out.println("App is running on background");
+                        // do nothing
                     }
                 } catch (Exception e) {
                     e.printStackTrace();
                 }
-
                 try {
                     TimeUnit.SECONDS.sleep(1);
                 } catch (Exception e) {
@@ -526,9 +519,6 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         }
-
         return false;
     }
-
-
 }
