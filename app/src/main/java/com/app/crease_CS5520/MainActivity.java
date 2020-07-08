@@ -247,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
                             new Intent(context, MainActivity.class), 0);
 
                     mBuilder = new NotificationCompat.Builder(MainActivity.this, CHANNEL_ID)
-                            .setContentTitle("Crease New Message")
+                            .setContentTitle("Tempurary New Message")
                             .setContentText(display)
                             .setWhen(System.currentTimeMillis())
                             .setSmallIcon(R.mipmap.ic_launcher)
