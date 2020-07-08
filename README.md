@@ -2,16 +2,11 @@
 
 **Group: Crease**
 
-**Member:**
+**Member: Zongwei Fan, Siyu Chen, Jing Shen**
 
-**Zongwei Fan - Branch: [zongwei](https://github.ccs.neu.edu/siyuchen2020/NEU_CS5520_Crease/tree/zongwei)**
+**Tempurary: A realtime group chat app by firebase.**
 
-**Siyu Chen - Branch: [Siyu-01](https://github.ccs.neu.edu/siyuchen2020/NEU_CS5520_Crease/tree/Siyu-01)**
-
-**Jing Shen - Branch: [Jing](https://github.ccs.neu.edu/siyuchen2020/NEU_CS5520_Crease/tree/Jing)**
-
-**Tempurary: A realtime group chat app by firebase.
-Users can get the stickers sending from friends who also have the app.**
+**Users can get the stickers sending from friends who also have the app.**
 
 - *Assignment requirement:*
 - [x] send stickers to your friends who also have the app. 
@@ -29,11 +24,11 @@ Users can get the stickers sending from friends who also have the app.**
 
 Holding Zoom meeting for pair work:
 
-> clarify to do list
+> Clarify to do list
 
-Zongwei Fan clarify to do list for the assignment
+Zongwei Fan clarified to do list for the assignment
 - *1. create user class 2. create method for display stickers 3. create method for display history* 
-> Teamwork on GitHub group  
+> Set GitHub group  
 - [x] Siyu Chen added firebase and created this repository .  
 - [x] Jing Shen and Zongwei Fan added branches.  
 - [x] Successfully tested pull and push.  
@@ -60,7 +55,7 @@ Zongwei Fan clarify to do list for the assignment
 [driver: Siyu Chen, Navigator: Jing Shen]
 - [x] Created and updated stickers class
 - [x] Show stickers collections
-- [x] allow user tap stickers and send 
+- [x] Allow user tap stickers and send 
 - [x] Adapt to FireBase login username
 
 
@@ -78,8 +73,8 @@ Zongwei Fan clarify to do list for the assignment
 
 ## Bugs Fix
 - [x] Fix landscape change crash bug [driver: Zongwei Fan，Jing Shen]
-- [x] Fix notification push bugs [driver: Siyu Chen, Zongwei Fan]
-- [x] Update UI feature & icon [driver: Jing Shen]
+- [x] Fix notification push bug [driver: Siyu Chen, Zongwei Fan]
+- [x] Fix and Update UI feature & icon [driver: Jing Shen]
 - [x] Fix user records rewrite bug [driver: Siyu Chen]
-- [x] Fix recycleView rotation problem [driver: Siyu Chen]
-
+- [x] Fix recycleView rotation bug [driver: Siyu Chen]
+- [x] Fix listener bug [driver: Siyu Chen]
