@@ -1,4 +1,4 @@
-# NEU CS5520 Week9 Group Project - Tempurary App
+# Tempurary App
 
 **Group: Crease**
 
