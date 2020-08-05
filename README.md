@@ -1,31 +1,21 @@
 # Tempurary App
 
-**Group: Crease**
+**Group: Tempurary**
 
 **Member: Zongwei Fan, Siyu Chen, Jing Shen**
 
-**Tempurary: A realtime group chat app by firebase.**
+**A Realtime Group Chat App**
 
-**Users can get the stickers sending from friends who also have the app.**
-
-- *Assignment requirement:*
-- [x] send stickers to your friends who also have the app. 
-- [x] predefined "stickers"
-- [x] Display how many stickers a user has sent
-- [x] Show user a history of stickers that they have been sent
-- [x] Adapt to different size screen
-- [x] Login with username feature
-- [x] Handle background running situation
-- [x] Notify the user when received a new sticker
-- [x] Submit a link to the apk and a GitHub link. 
+[<img src="https://play.google.com/intl/en_us/badges/images/generic/en_badge_web_generic.png" alt="Get it on Google Play" height="80" />](https://play.google.com/store/apps/details?id=com.app.crease_CS5520&hl=en_US)
 
 
-## Clarify Assignment todo and Create GitHub group
+An Android app created for light social purpose; users could send stickers to each other to express emotions.
 
-Holding Zoom meeting for pair work:
 
+----------------------------------------------------------------------------------------------------------------
+
+## Holding Zoom meeting for pair work:
 > Clarify to do list
-
 Zongwei Fan clarified to do list for the assignment
 - *1. create user class 2. create method for display stickers 3. create method for display history* 
 > Set GitHub group  
